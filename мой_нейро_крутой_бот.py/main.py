@@ -8,7 +8,7 @@ async def main():
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher()
     
-    # Подключаем обработчики
+    # Подключаем обработчики яиц
     dp.include_router(router)
 
     logging.basicConfig(level=logging.INFO)
@@ -19,3 +19,4 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Бот вырублен пон да")
+
