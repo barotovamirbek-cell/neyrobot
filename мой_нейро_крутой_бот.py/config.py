@@ -1,7 +1,5 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-GEMINI_KEY = os.getenv("GEMINI_KEY")
+BOT_TOKEN = "8280821911:AAEWEyRCwbFDTSfb4AuZUvBtNoCfIIWM2L8"
+GEMINI_KEY = "AIzaSyDTaWerQgHmz3Ur10GdoCHwWoS0ZyYUcQc"
