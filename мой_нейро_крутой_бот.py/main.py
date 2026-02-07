@@ -1,43 +1,28 @@
-import subprocess
-import sys
-import logging
-
-# --- БЛОК АВТОУСТАНОВКИ (решает проблему от которой я в ахуе) ---
-def install_dependencies():
-    packages = ["aiogram", "google-generativeai"]
-    for package in packages:
-        try:
-            if package == "google-generativeai":
-                __import__("google.generativeai")
-            else:
-                __import__(package)
-        except ImportError:
-            print(f"Установка {package} через pip...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-# Запускаем установку мистер фурри 
-install_dependencies()
-# -------------------------------------------------------------
-
 import asyncio
+import logging
 from aiogram import Bot, Dispatcher
 from config import BOT_TOKEN
 from handlers.messages import router
 
-# Настройка логирования, чтобы видеть ошибки в консоли хостинга
-logging.basicConfig(level=logging.INFO)
+# Настройка логирования для отслеживания ошибок в консоли BotHost
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 async def main():
-    # Инициализация бота и диспетчера
+    # Инициализация бота
     bot = Bot(token=BOT_TOKEN)
+    
+    # Инициализация диспетчера
     dp = Dispatcher()
     
-    # Подключаем роутер с логикой ИИ
+    # Подключаем наш роутер с логикой Groq
     dp.include_router(router)
 
-    print("Бот запущен и готов к работе!")
+    logging.info("Бот на Groq запущен!")
     
-    # Пропускаем накопившиеся сообщения и запускаем опрос
+    # Очищаем очередь старых сообщений и запускаем бота
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
@@ -45,6 +30,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
-        print("Бот пошел спать")
+        logging.info("Бот остановлен спатке")
     except Exception as e:
-        print(f"Критический пиздец зовите майсера: {e}")
+        logging.error(f"Критическая ошибка при запуске зовите майсера: {e}")
+
