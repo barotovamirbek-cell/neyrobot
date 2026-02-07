@@ -1,46 +1,37 @@
-import google.generativeai as genai
+import os
+from groq import Groq
 from aiogram import Router, types
-from config import GEMINI_KEY
+from config import GROQ_KEY 
 
-# Инициализация пенисногороутасука
 router = Router()
-
-# Настройка нейросети
-genai.configure(api_key=GEMINI_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = Groq(api_key=GROQ_KEY)
 
 @router.message()
 async def echo_ai(message: types.Message):
-    # Игнорирование сообщений без текста (картинки, стикеры и т.д.)
     if not message.text:
         return
 
-    
     bot_info = await message.bot.get_me()
     bot_username = f"@{bot_info.username}"
 
-    # Проверки: личкагея, упоминание или ответ на сообщение бота окак это мой нейропук да тот кто это читает хуле тут забыл говно
+    # Проверки: личка, упоминание или ответ на сообщение бота
     is_private = message.chat.type == "private"
-    is_mention = message.text.startswith(bot_username)
+    is_mention = bot_username in message.text
     is_reply_to_me = message.reply_to_message and message.reply_to_message.from_user.id == bot_info.id
 
     if is_private or is_mention or is_reply_to_me:
-        # Отображение статуса "печатает..." нихуя себе я об этом шас узнал
         await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
         
         try:
-            # Очистка текста от упоминания бота (@имя_бота), чтобы ИИ не тупил
+            # Очищаю текст от ника бота
             prompt = message.text.replace(bot_username, "").strip()
             
-            # Если после удаления ника пусто — не отвечаем
-            if not prompt and not is_reply_to_me:
-                return
-
-            # Запрос к нейросети
-            response = model.generate_content(prompt)
+            # Запрос к нейросети (использую пон Llama 3)
+            chat_completion = client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama-3.3-70b-versatile", # Мощная и бесплатная модель (100 проц не уверен но ок)
+            )
             
-            # Ответ пользователю
-            await message.reply(response.text)
-            
+            await message.reply(chat_completion.choices[0].message.content)
         except Exception as e:
-            await message.answer(f"⚠️ Произошла ошибка: {e}")
+            await message.answer(f"Ошибка ахеренная зовите майсера: {e}")
